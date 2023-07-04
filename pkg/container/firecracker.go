@@ -77,6 +77,11 @@ func ExecuteFirecracker(vm *api.VM, fcIfaces firecracker.NetworkInterfaces) (err
 		MetricsFifo: metricsSocketPath,
 	}
 
+	//cfg.InitrdPath = constants.IGNITE_SPAWN_INITRD_FILE_PATH
+	if vm.Spec.Kernel.HasInitrd {
+		cfg.InitrdPath = constants.IGNITE_SPAWN_INITRD_FILE_PATH
+	}
+
 	// Add the volumes to the VM
 	for i, volume := range vm.Spec.Storage.Volumes {
 		volumePath := path.Join(constants.IGNITE_SPAWN_VOLUME_DIR, volume.Name)

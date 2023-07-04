@@ -523,6 +523,7 @@ func Convert_ignite_Kernel_To_v1alpha4_Kernel(in *ignite.Kernel, out *Kernel, s 
 
 func autoConvert_v1alpha4_KernelSpec_To_ignite_KernelSpec(in *KernelSpec, out *ignite.KernelSpec, s conversion.Scope) error {
 	out.OCI = in.OCI
+	out.HasInitrd = in.HasInitrd
 	return nil
 }
 
@@ -533,6 +534,7 @@ func Convert_v1alpha4_KernelSpec_To_ignite_KernelSpec(in *KernelSpec, out *ignit
 
 func autoConvert_ignite_KernelSpec_To_v1alpha4_KernelSpec(in *ignite.KernelSpec, out *KernelSpec, s conversion.Scope) error {
 	out.OCI = in.OCI
+	out.HasInitrd = in.HasInitrd
 	return nil
 }
 
@@ -817,6 +819,7 @@ func Convert_ignite_VMImageSpec_To_v1alpha4_VMImageSpec(in *ignite.VMImageSpec, 
 
 func autoConvert_v1alpha4_VMKernelSpec_To_ignite_VMKernelSpec(in *VMKernelSpec, out *ignite.VMKernelSpec, s conversion.Scope) error {
 	out.OCI = in.OCI
+	out.HasInitrd = in.HasInitrd
 	out.CmdLine = in.CmdLine
 	return nil
 }
@@ -828,6 +831,7 @@ func Convert_v1alpha4_VMKernelSpec_To_ignite_VMKernelSpec(in *VMKernelSpec, out 
 
 func autoConvert_ignite_VMKernelSpec_To_v1alpha4_VMKernelSpec(in *ignite.VMKernelSpec, out *VMKernelSpec, s conversion.Scope) error {
 	out.OCI = in.OCI
+	out.HasInitrd = in.HasInitrd
 	out.CmdLine = in.CmdLine
 	return nil
 }

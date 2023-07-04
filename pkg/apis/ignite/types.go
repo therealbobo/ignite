@@ -121,6 +121,9 @@ type KernelSpec struct {
 	OCI meta.OCIImageRef `json:"oci"`
 	// Optional future feature, support per-kernel specific default command lines
 	// DefaultCmdLine string
+
+	// Describe if the OCIImageRef has a initrd
+	HasInitrd bool `json:"initrd"`
 }
 
 // KernelStatus describes the status of a kernel
@@ -174,8 +177,9 @@ type VMImageSpec struct {
 }
 
 type VMKernelSpec struct {
-	OCI     meta.OCIImageRef `json:"oci"`
-	CmdLine string           `json:"cmdLine,omitempty"`
+	OCI       meta.OCIImageRef `json:"oci"`
+	HasInitrd bool             `json:"initrd"`
+	CmdLine   string           `json:"cmdLine,omitempty"`
 }
 
 // VMSandboxSpec is the spec of the sandbox used for the VM.

@@ -90,6 +90,12 @@ func StartVMNonBlocking(vm *api.VM, debug bool) (*VMChannels, error) {
 				HostPath:      path.Join(kernelDir, constants.KERNEL_FILE),
 				ContainerPath: constants.IGNITE_SPAWN_VMLINUX_FILE_PATH,
 			},
+			{
+				// TODO(therealbobo): check if this has to be removed if not present
+				// Mount the initrd file specifically into the container, to a well-known place for ignite-spawn to access
+				HostPath:      path.Join(kernelDir, constants.INITRD_FILE),
+				ContainerPath: constants.IGNITE_SPAWN_INITRD_FILE_PATH,
+			},
 		},
 		CapAdds: []string{
 			"SYS_ADMIN", // Needed to run "dmsetup remove" inside the container

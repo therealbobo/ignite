@@ -2138,8 +2138,16 @@ func schema_pkg_apis_ignite_v1alpha4_KernelSpec(ref common.ReferenceCallback) co
 							Ref:     ref("github.com/weaveworks/ignite/pkg/apis/meta/v1alpha1.OCIImageRef"),
 						},
 					},
+					"initrd": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Describe if the OCIImageRef has a initrd",
+							Default:     false,
+							Type:        []string{"boolean"},
+							Format:      "",
+						},
+					},
 				},
-				Required: []string{"oci"},
+				Required: []string{"oci", "initrd"},
 			},
 		},
 		Dependencies: []string{
@@ -2512,6 +2520,13 @@ func schema_pkg_apis_ignite_v1alpha4_VMKernelSpec(ref common.ReferenceCallback) 
 							Ref:     ref("github.com/weaveworks/ignite/pkg/apis/meta/v1alpha1.OCIImageRef"),
 						},
 					},
+					"initrd": {
+						SchemaProps: spec.SchemaProps{
+							Default: false,
+							Type:    []string{"boolean"},
+							Format:  "",
+						},
+					},
 					"cmdLine": {
 						SchemaProps: spec.SchemaProps{
 							Type:   []string{"string"},
@@ -2519,7 +2534,7 @@ func schema_pkg_apis_ignite_v1alpha4_VMKernelSpec(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"oci"},
+				Required: []string{"oci", "initrd"},
 			},
 		},
 		Dependencies: []string{

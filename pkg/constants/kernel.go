@@ -7,6 +7,9 @@ const (
 	// Kernel filename
 	KERNEL_FILE = "vmlinux"
 
+	// Initrd filename
+	INITRD_FILE = "initrd"
+
 	// Filename for the tar containing the kernel filesystem
 	KERNEL_TAR = "kernel.tar"
 

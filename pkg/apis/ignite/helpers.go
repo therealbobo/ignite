@@ -16,6 +16,7 @@ func (vm *VM) SetImage(image *Image) {
 // SetKernel populates relevant fields to a Kernel on the VM object
 func (vm *VM) SetKernel(kernel *Kernel) {
 	vm.Spec.Kernel.OCI = kernel.Spec.OCI
+	vm.Spec.Kernel.HasInitrd = kernel.Spec.HasInitrd
 	vm.Status.Kernel = kernel.Status.OCISource
 }
 

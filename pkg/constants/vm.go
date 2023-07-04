@@ -30,6 +30,9 @@ const (
 	// Where the vmlinux kernel is located inside of the container
 	IGNITE_SPAWN_VMLINUX_FILE_PATH = "/vmlinux"
 
+	// Where the initrd is located inside of the container
+	IGNITE_SPAWN_INITRD_FILE_PATH = "/initrd"
+
 	// Subdirectory for volumes to be forwarded into the VM
 	IGNITE_SPAWN_VOLUME_DIR = "/volumes"
 

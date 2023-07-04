@@ -126,6 +126,9 @@ func importKernel(c *client.Client, ociRef meta.OCIImageRef) (*api.Kernel, error
 	// vmlinuxFile describes the uncompressed kernel file at /var/lib/firecracker/kernel/<id>/vmlinux
 	vmlinuxFile := path.Join(kernel.ObjectPath(), constants.KERNEL_FILE)
 
+	// vmlinuxFile describes the uncompressed kernel file at /var/lib/firecracker/kernel/<id>/initrd
+	initrdFile := path.Join(kernel.ObjectPath(), constants.INITRD_FILE)
+
 	// Create both the kernel tar file and the vmlinux file it either doesn't exist
 	if !util.FileExists(kernelTarFile) || !util.FileExists(vmlinuxFile) {
 		// Create a temporary directory for extracting
@@ -150,6 +153,19 @@ func importKernel(c *client.Client, ociRef meta.OCIImageRef) (*api.Kernel, error
 		// Copy the vmlinux file
 		if err := util.CopyFile(kernelTmpFile, vmlinuxFile); err != nil {
 			return nil, fmt.Errorf("failed to copy kernel file %q to kernel %q: %v", kernelTmpFile, kernel.GetUID(), err)
+		}
+
+		// Locate the initrd file in the temporary directory
+		initrdTmpFile, err := findInitrd(tempDir)
+		if err == nil {
+			// initrd file found
+			kernel.Spec.HasInitrd = true
+			// Copy the initrd file
+			if err := util.CopyFile(initrdTmpFile, initrdFile); err != nil {
+				return nil, fmt.Errorf("failed to copy initrd file %q to initrd %q: %v", initrdTmpFile, kernel.GetUID(), err)
+			}
+		} else {
+			kernel.Spec.HasInitrd = false
 		}
 
 		// Pack the kernel tar with unnecessary data removed
@@ -214,4 +230,36 @@ func findKernel(tmpDir string) (string, error) {
 
 	// Return the path relative to the boot directory
 	return path.Join(bootDir, kernel), nil
+}
+func findInitrd(tmpDir string) (string, error) {
+	// find the path to the kernel, resolve symlinks if necessary
+	bootDir := path.Join(tmpDir, "boot")
+	initrd := path.Join(bootDir, constants.INITRD_FILE)
+
+	fi, err := os.Lstat(initrd)
+	if err != nil {
+		return "", err
+	}
+
+	if fi.Mode()&os.ModeSymlink == 0 {
+		// The target file is a real file, not a symlink. Return it
+		return initrd, nil
+	}
+
+	// The target is a symlink
+	initrd, err = os.Readlink(initrd)
+	if err != nil {
+		return "", err
+	}
+
+	// Cleanup the path for absolute and relative symlinks
+	if path.IsAbs(initrd) {
+		// return the path relative to the tempdir (root)
+		// NOTE: This will fail if the symlink starts with any directory other than
+		// "/boot", as we don't extract more
+		return path.Join(tmpDir, initrd), nil
+	}
+
+	// Return the path relative to the boot directory
+	return path.Join(bootDir, initrd), nil
 }
