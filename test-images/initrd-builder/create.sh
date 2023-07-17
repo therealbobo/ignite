@@ -51,17 +51,23 @@ mount -t devtmpfs dev /dev
 # Load essential modules
 depmod
 
+if grep -q NOMODULES /proc/cmdline ; then
+	echo "skipping kmods"
+else
+
 EOF
 
 for MODULE in ${MODULES[@]}; do
 	if [[ $MODULE == 'virtio_mmio' ]]; then
-		echo "modprobe $MODULE"' $(cat /proc/cmdline | grep -o "device=[^\ ]*" | paste -s)'
+		echo -e "\tmodprobe $MODULE"' $(cat /proc/cmdline | grep -o "device=[^\ ]*" | paste -s)'
 	else
-		echo "modprobe $MODULE"
+		echo -e "\tmodprobe $MODULE"
 	fi
 done >> ${OUTDIR}/init
 
 cat <<EOF >> ${OUTDIR}/init
+
+fi
 
 # Mount the root filesystem.
 mount /dev/vda /mnt/

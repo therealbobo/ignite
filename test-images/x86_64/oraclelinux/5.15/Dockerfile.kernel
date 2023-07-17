@@ -1,14 +1,19 @@
-FROM initrd-builder:0.0.1 AS stage1
-
 ARG VERSION=5.15.0-8.91.4.1
 ARG URL='https://yum.oracle.com/repo/OracleLinux/OL9/UEKR7/x86_64'
+ARG ARCH=x86_64
+
+FROM initrd-builder:0.0.1 AS stage1
+
+ARG VERSION
+ARG URL
+ARG ARCH
 
 WORKDIR /home/ubuntu
 
 RUN touch .placeholder && \
-	curl -L -o kernel.rpm  ${URL}/getPackage/kernel-uek-core-${VERSION}.el9uek.x86_64.rpm && \
-	curl -L -o devel.rpm   ${URL}/getPackage/kernel-uek-devel-${VERSION}.el9uek.x86_64.rpm && \
-	curl -L -o modules.rpm ${URL}/getPackage/kernel-uek-modules-${VERSION}.el9uek.x86_64.rpm && \
+	curl -L -o kernel.rpm  ${URL}/getPackage/kernel-uek-core-${VERSION}.el9uek.${ARCH}.rpm && \
+	curl -L -o devel.rpm   ${URL}/getPackage/kernel-uek-devel-${VERSION}.el9uek.${ARCH}.rpm && \
+	curl -L -o modules.rpm ${URL}/getPackage/kernel-uek-modules-${VERSION}.el9uek.${ARCH}.rpm && \
 	rpm2cpio kernel.rpm  > kernel.cpio && \
 	rpm2cpio devel.rpm   > devel.cpio  && \
 	rpm2cpio modules.rpm > modules.cpio  && \
@@ -23,6 +28,10 @@ RUN touch .placeholder && \
 
 FROM oraclelinux:9 as kmod-builder
 
+ARG VERSION
+ARG URL
+ARG ARCH
+
 WORKDIR /home/ubuntu
 COPY --from=stage1 /home/ubuntu/extracted   /home/ubuntu/extracted/
 COPY --from=stage1 /opt/initrd-builder/*    /opt/initrd-builder/
@@ -36,10 +45,7 @@ RUN yum groupinstall -y 'Development Tools' && \
 
 FROM initrd-builder:0.0.1 AS stage2
 
-#RUN mkdir -p /home/ubuntu/out
-
 COPY --from=stage1       /home/ubuntu/extracted      /home/ubuntu/extracted/
-#COPY --from=kmod-builder /home/ubuntu/virtio_mmio.ko /home/ubuntu/out/test.ko
 COPY --from=kmod-builder /home/ubuntu/virtio_mmio.ko /home/ubuntu/
 RUN cd /home/ubuntu/extracted && \
 	/opt/initrd-builder/create.sh
@@ -48,4 +54,4 @@ FROM scratch
 
 COPY --from=stage1 /home/ubuntu/extracted/vmlinux /boot/
 COPY --from=stage2 /home/ubuntu/out/initrd        /boot/
-COPY --from=stage1 /home/ubuntu/.placeholder /lib/modules/
+COPY --from=stage1 /home/ubuntu/.placeholder      /lib/modules/

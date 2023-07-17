@@ -19,7 +19,6 @@ RUN pacman -Syyu --noconfirm && \
 		rsync \
 		systemd \
 		wget && \
-	yes | pacman -Scc || exit 0 && \
 	ln -sf /usr/share/zoneinfo/US/Eastern /etc/localtime && \
 	echo 'LANG=en_US.UTF-8' > /etc/locale.gen && \
 	locale-gen && \
@@ -31,4 +30,5 @@ RUN pacman -Syyu --noconfirm && \
 	curl -Lo headers.tar.xz ${URL}/l/linux-aarch64-headers/linux-aarch64-headers-4.14.15-1-aarch64.pkg.tar.xz && \
 	pacman -U --noconfirm ./headers.tar.xz && \
 	rm -v ./headers.tar.xz && \
-	ln -s /usr/lib/systemd/systemd /sbin/init
+	ln -s /usr/lib/systemd/systemd /sbin/init && \
+	yes | pacman -Scc || exit 0

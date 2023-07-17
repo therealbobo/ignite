@@ -1,20 +1,24 @@
-FROM initrd-builder:0.0.1 AS stage1
-
 ARG VERSION=5.14.0-325
 ARG BASEOS_URL='https://mirror.stream.centos.org/9-stream/BaseOS/x86_64/os/Packages'
 ARG APPSTR_URL='http://mirror.stream.centos.org/9-stream/AppStream/x86_64/os/Packages'
-#/kernel-5.14.0-333.el9.x86_64.rpm
-#/kernel-devel-5.14.0-325.el9.x86_64.rpm
+ARG ARCH=x86_64
+
+FROM initrd-builder:0.0.1 AS stage1
+
+ARG VERSION
+ARG BASEOS_URL
+ARG APPSTR_URL
+ARG ARCH
 
 WORKDIR /home/ubuntu
 
 RUN touch .placeholder && \
-	curl -Lo kernel.rpm  ${BASEOS_URL}/kernel-${VERSION}.el9.x86_64.rpm              && \
-	curl -Lo modules.rpm ${BASEOS_URL}/kernel-modules-core-${VERSION}.el9.x86_64.rpm && \
-	curl -Lo core.rpm    ${BASEOS_URL}/kernel-core-${VERSION}.el9.x86_64.rpm         && \
-	curl -Lo headers.rpm ${APPSTR_URL}/kernel-devel-${VERSION}.el9.x86_64.rpm        && \
+	curl -Lo kernel.rpm  ${BASEOS_URL}/kernel-${VERSION}.el9.${ARCH}.rpm              && \
+	curl -Lo modules.rpm ${BASEOS_URL}/kernel-modules-core-${VERSION}.el9.${ARCH}.rpm && \
+	curl -Lo core.rpm    ${BASEOS_URL}/kernel-core-${VERSION}.el9.${ARCH}.rpm         && \
+	curl -Lo headers.rpm ${APPSTR_URL}/kernel-devel-${VERSION}.el9.${ARCH}.rpm        && \
 	rpm2cpio kernel.rpm  > kernel.cpio  && \
-	rpm2cpio modules.rpm > modules.cpio  && \
+	rpm2cpio modules.rpm > modules.cpio && \
 	rpm2cpio core.rpm    > core.cpio    && \
 	rpm2cpio headers.rpm > headers.cpio && \
 	mkdir extracted && \
@@ -29,6 +33,11 @@ RUN touch .placeholder && \
 
 FROM quay.io/centos/centos:stream9 as kmod-builder
 
+ARG VERSION
+ARG BASEOS_URL
+ARG APPSTR_URL
+ARG ARCH
+
 WORKDIR /home/ubuntu
 COPY --from=stage1 /home/ubuntu/extracted   /home/ubuntu/extracted/
 COPY --from=stage1 /opt/initrd-builder/*    /opt/initrd-builder/
@@ -42,11 +51,10 @@ FROM initrd-builder:0.0.1 AS stage2
 COPY --from=stage1       /home/ubuntu/extracted      /home/ubuntu/extracted/
 COPY --from=kmod-builder /home/ubuntu/virtio_mmio.ko /home/ubuntu/
 RUN cd /home/ubuntu/extracted && \
-	ls -lah /home/ubuntu/ && \
 	/opt/initrd-builder/create.sh
 
 FROM scratch
 
 COPY --from=stage1 /home/ubuntu/extracted/vmlinux /boot/
 COPY --from=stage2 /home/ubuntu/out/initrd        /boot/
-COPY --from=stage1 /home/ubuntu/.placeholder /lib/modules/
+COPY --from=stage1 /home/ubuntu/.placeholder      /lib/modules/

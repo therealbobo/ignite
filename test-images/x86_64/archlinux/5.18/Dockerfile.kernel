@@ -1,14 +1,18 @@
-FROM initrd-builder:0.0.1 AS builder
-
 ARG VERSION=5.18.16.arch1-1
 ARG URL='https://archive.archlinux.org/packages/l'
+ARG ARCH=x86_64
+
+FROM initrd-builder:0.0.1 AS builder
+
+ARG VERSION
+ARG URL
+ARG ARCH
 
 WORKDIR /home/ubuntu
 
 RUN touch .placeholder && \
-	curl -Lo kernel.pkg.tar.zst  ${URL}/linux/linux-${VERSION}-x86_64.pkg.tar.zst && \
-	curl -Lo headers.pkg.tar.zst ${URL}/linux-headers/linux-headers-${VERSION}-x86_64.pkg.tar.zst && \
-	echo curl -Lo headers.pkg.tar.zst ${URL}/linux-headers/linux-headers-${VERSION}-x86_64.pkg.tar.zst && \
+	curl -Lo kernel.pkg.tar.zst  ${URL}/linux/linux-${VERSION}-${ARCH}.pkg.tar.zst && \
+	curl -Lo headers.pkg.tar.zst ${URL}/linux-headers/linux-headers-${VERSION}-${ARCH}.pkg.tar.zst && \
 	mkdir extracted && \
 	cd extracted && \
 	ls ../*.tar.zst | \

@@ -1,14 +1,18 @@
-FROM initrd-builder:0.0.1 AS stage1
-
 ARG VERSION=3.10.0-1160
 ARG BASEOS_URL='http://mirror.centos.org/centos/7.9.2009/os/x86_64/Packages'
-#http://mirror.centos.org/centos/7.9.2009/os/x86_64/Packages/kernel-3.10.0-1160.el7.x86_64.rpm
+ARG ARCH=x86_64
+
+FROM initrd-builder:0.0.1 AS stage1
+
+ARG VERSION
+ARG BASEOS_URL
+ARG ARCH
 
 WORKDIR /home/ubuntu
 
 RUN touch .placeholder && \
-	curl -Lo kernel.rpm  ${BASEOS_URL}/kernel-${VERSION}.el7.x86_64.rpm              && \
-	curl -Lo headers.rpm ${BASEOS_URL}/kernel-devel-${VERSION}.el7.x86_64.rpm        && \
+	curl -Lo kernel.rpm  ${BASEOS_URL}/kernel-${VERSION}.el7.x86_64.rpm       && \
+	curl -Lo headers.rpm ${BASEOS_URL}/kernel-devel-${VERSION}.el7.x86_64.rpm && \
 	rpm2cpio kernel.rpm  > kernel.cpio  && \
 	rpm2cpio headers.rpm > headers.cpio && \
 	mkdir extracted && \
@@ -20,6 +24,10 @@ RUN touch .placeholder && \
 	extract-vmlinux $(find ./extracted/ -name 'vmlinuz*') > extracted/vmlinux
 
 FROM centos:centos7.9.2009 as kmod-builder
+
+ARG VERSION
+ARG BASEOS_URL
+ARG ARCH
 
 WORKDIR /home/ubuntu
 COPY --from=stage1 /home/ubuntu/extracted   /home/ubuntu/extracted/
@@ -35,7 +43,7 @@ RUN yum groupinstall -y 'Development Tools' && \
 	tar -xaf 'linux-3.10.0-1160.el7.tar.xz' && \
 	cd .. && \
 	find src -name 'virtio_mmio.c' -exec cp -v {} . \; && \
-	KERNEL_DIR=/home/ubuntu/extracted/usr/src/kernels/3.10.0-1160.el7.x86_64/ make && ls -lah 
+	KERNEL_DIR='/home/ubuntu/extracted/usr/src/kernels/3.10.0-1160.el7.x86_64/' make
 
 FROM initrd-builder:0.0.1 AS stage2
 COPY --from=stage1       /home/ubuntu/extracted      /home/ubuntu/extracted/
@@ -48,4 +56,4 @@ FROM scratch
 
 COPY --from=stage1 /home/ubuntu/extracted/vmlinux /boot/
 COPY --from=stage2 /home/ubuntu/out/initrd        /boot/
-COPY --from=stage1 /home/ubuntu/.placeholder /lib/modules/
+COPY --from=stage1 /home/ubuntu/.placeholder      /lib/modules/
