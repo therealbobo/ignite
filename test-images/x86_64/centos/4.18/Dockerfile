@@ -5,24 +5,25 @@ ARG BASEOS_URL='http://mirror.centos.org/centos/8-stream/BaseOS/x86_64/os/Packag
 
 RUN dnf groupinstall -y 'Development Tools' && \
 	dnf install -y --allowerasing \
-		curl \
-		systemd \
-		openssh-server \
-		iproute \
-		rsync \
-		cmake \
 		clang \
-		llvm \
+		cmake \
+		curl \
+		git \
+		iproute \
 		libcap-devel \
-		git && \
+		llvm \
+		openssh-server \
+		rsync \
+		systemd && \
 	curl -Lo headers.rpm ${BASEOS_URL}/kernel-devel-${VERSION}.el8.x86_64.rpm && \
-	dnf install -y ./headers.rpm && \
-	rm -v ./headers.rpm && \
 	curl -Lo bpftool.rpm ${BASEOS_URL}/bpftool-${VERSION}.el8.x86_64.rpm && \
-	dnf install -y ./bpftool.rpm && \
-	rm -v ./bpftool.rpm && \
+	dnf install -y ./headers.rpm ./bpftool.rpm && \
+	rm -v ./bpftool.rpm ./headers.rpm && \
 	mkdir -p /lib/modules/${VERSION}.el8.x86_64/ && \
 	ln -s /usr/src/kernels/${VERSION}.el8.x86_64/ /lib/modules/${VERSION}.el8.x86_64/build && \
+	dnf clean all && \
+	rm -rf /var/cache/yum && \
+	mkdir -p /lib/modules/${VERSION}.fc38.x86_64 && \
 	sed -i -e 's/^AcceptEnv LANG LC_\*$/#AcceptEnv LANG LC_*/' /etc/ssh/sshd_config && \
 	echo "root:root" | chpasswd
 

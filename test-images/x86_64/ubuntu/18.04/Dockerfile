@@ -8,8 +8,6 @@ WORKDIR /home/ubuntu
 RUN apt-get update && apt-get install -y \
 		build-essential \
 		clang \
-		cmake \
-		curl \
 		curl \
 		dbus \
 		git \
@@ -31,12 +29,16 @@ RUN apt-get update && apt-get install -y \
 	rm -rf /var/lib/apt/lists/* && \
 	curl ${URL} | \
 		grep -E "linux-headers-${VERSION}|linux-tools-${VERSION}|linux-tools-common_${VERSION}" | \
-		grep -v 'i386' | \
-		grep -vE 'generic|lowlatency' | \
+		grep -vE 'i386|lowlatency' | \
 		cut -d\" -f2 | \
 		xargs -I@ curl -LO ${URL}@ && \
 	find . -name '*.deb' | xargs -n1 dpkg -i --force-depends && \
 	rm -v *.deb && \
 	echo "" > /etc/machine-id && echo "" > /var/lib/dbus/machine-id && \
 	sed -i -e 's/^AcceptEnv LANG LC_\*$/#AcceptEnv LANG LC_*/' /etc/ssh/sshd_config && \
-	echo "root:root" | chpasswd
+	echo "root:root" | chpasswd && \
+	curl -LO https://cmake.org/files/v3.16/cmake-3.16.7-Linux-x86_64.tar.gz && \
+	tar -xaf cmake-3.16.7-Linux-x86_64.tar.gz && \
+	rm -vf cmake-3.16.7-Linux-x86_64.tar.gz && \
+	mv cmake-3.16.7-Linux-x86_64     /opt/cmake-3.16.7 && \
+	ln -sf  /opt/cmake-3.16.7/bin/*  /usr/bin/

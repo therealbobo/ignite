@@ -37,7 +37,7 @@ RUN yum install -y \
 	ln -sf  /opt/cmake-3.16.7/bin/*    /usr/bin/ && \
 	mkdir -p  /lib/modules/${VERSION}.731.amzn2.x86_64/ && \
 	ln -s /usr/src/kernels/${VERSION}.731.amzn2.x86_64/ /lib/modules/${VERSION}.731.amzn2.x86_64/build && \
-	rm /usr/bin/gcc /usr/bin/g++ && \
+	rm -vf /usr/bin/gcc /usr/bin/g++ && \
 	update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc10-gcc 100 --slave /usr/bin/g++ g++ /usr/bin/gcc10-c++ && \
 	update-alternatives --auto gcc && \
 	yum clean all && \

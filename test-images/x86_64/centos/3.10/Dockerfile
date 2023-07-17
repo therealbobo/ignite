@@ -5,18 +5,18 @@ ARG BASEOS_URL='http://mirror.centos.org/centos/7.9.2009/os/x86_64/Packages'
 
 RUN yum group install -y "Development Tools" && \
 	yum install -y \
-		curl \
-		systemd \
-		openssh-server \
-		iproute \
-		rsync \
 		cmake \
-		libcap-devel \
-		git \
+		curl \
 		gcc \
-		tar \
+		git \
+		iproute \
+		libcap-devel \
 		libstdc++ \
-		make && \
+		make \
+		openssh-server \
+		rsync \
+		systemd \
+		tar && \
 	curl -Lo headers.rpm ${BASEOS_URL}/kernel-devel-${VERSION}.el7.x86_64.rpm && \
 	yum install -y ./headers.rpm && \
 	rm -v ./headers.rpm && \
@@ -27,5 +27,7 @@ RUN yum group install -y "Development Tools" && \
 	rm -vf cmake-3.16.7-Linux-x86_64.tar.gz && \
 	mv cmake-3.16.7-Linux-x86_64     /opt/cmake-3.16.7 && \
 	ln -sf  /opt/cmake-3.16.7/bin/*    /usr/bin/ && \
+	yum clean all && \
+	rm -rf /var/cache/yum && \
 	sed -i -e 's/^AcceptEnv LANG LC_\*$/#AcceptEnv LANG LC_*/' /etc/ssh/sshd_config && \
 	echo "root:root" | chpasswd
