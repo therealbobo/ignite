@@ -3,13 +3,29 @@ REPOSITORY := therealbobo
 ARCH ?= $(shell uname -p)
 YAML_FILE := images.yaml
 
-.PHONY: build-rootfs build-kernel docker-push generate-yaml build-all initrd-builder
+.PHONY: build-rootfs build-kernel docker-push generate-yaml build-all initrd-builder modernprobe-builder builder
+
+builder:
+	if [ "$(DRY_RUN)" = "true" ]; then \
+		echo "Dry run: Building builder image: docker build -t $(REPOSITORY)/builder:0.0.1-$(ARCH) builder"; \
+	else \
+		echo "Building modernprobe-builder image"; \
+		docker build -t $(REPOSITORY)/builder:0.0.1-$(ARCH) builder; \
+	fi
+
+modernprobe-builder:
+	if [ "$(DRY_RUN)" = "true" ]; then \
+		echo "Dry run: Building modernprobe-builder image: docker build -t $(REPOSITORY)/modernprobe-builder:0.0.1-$(ARCH) modernprobe-builder"; \
+	else \
+		echo "Building modernprobe-builder image"; \
+		docker build -t $(REPOSITORY)/modernprobe-builder:0.0.1-$(ARCH) modernprobe-builder; \
+	fi
 
 initrd-builder:
 	if [ "$(DRY_RUN)" = "true" ]; then \
 		echo "Dry run: Building initrd-builder image: docker build -t initrd-builder:0.0.1 initrd-builder"; \
 	else \
-		echo "Building initrd-builder image: $$image"; \
+		echo "Building initrd-builder image"; \
 		docker build -t initrd-builder:0.0.1 initrd-builder; \
 	fi
 
